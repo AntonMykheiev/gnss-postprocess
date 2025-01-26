@@ -1,8 +1,7 @@
 #include "src/dataProcessor.cpp"
 
-int main()
-{
-    processLogData();
+int main() {
+    processFileData();
 
     return 0;
 }
