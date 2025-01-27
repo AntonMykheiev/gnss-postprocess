@@ -35,3 +35,5 @@
 main
 main.dSYM
 temp
+external_libs
+.DS_Store

@@ -1,7 +1,8 @@
 #include "src/dataProcessor.cpp"
 
 int main() {
-    processFileData();
+    int fileDataSourceIndex = 0;
+    int udpDataSourceIndex = 1;
 
-    return 0;
+    return processData(fileDataSourceIndex);
 }
