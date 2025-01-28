@@ -1,8 +1,32 @@
-#include "src/dataProcessor.cpp"
+#include <iostream>
+#include "dataProcessor.hpp"
 
 int main() {
-    int fileDataSourceIndex = 0;
-    int udpDataSourceIndex = 1;
+    int choise = 0;
 
-    return processData(fileDataSourceIndex);
+    std::cout << "Choose an option:\n"
+              << "1. File post-processing\n"
+              << "2. UDP message processing\n"
+              << "3. Exit programm.\n";
+
+    std::cin >> choise;
+
+    switch (choise) {
+        case 1:
+            processFileData();
+
+            break;
+        case 2:
+            processUdpConnectionData();
+
+            break;
+        case 3:
+            std::cout << "Goodbye!";
+
+            break;
+        default:
+            std::cout << "Bad choise, try again!\n";
+    }
+
+    return 0;
 }

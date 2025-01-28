@@ -3,55 +3,50 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <string_view>
 
-#include "clients/saposClient.cpp"
-#include "clients/udpClient.cpp"
-#include "lineProcessor.cpp"
+#include "lineProcessor.hpp"
+#include "saposClient.hpp"
+#include "udpClient.hpp"
 
-using namespace std;
 using asio::ip::udp;
 
-int processFileData() {
-    ifstream receiverFile("./input/inputReceiver.obs");
-    ifstream baseStationFile("./input/inputBaseStation.obs");
-    ofstream processedFile("./result/processed.pos");
+void processFileData() {
+    std::ifstream receiverFile("./input/inputReceiver.obs");
+    std::ifstream baseStationFile("./input/inputBaseStation.obs");
+    std::ofstream processedFile("./result/processed.pos");
 
     if (!receiverFile.is_open()) {
-        throw runtime_error("Failed to open inputReceiver.obs");
+        throw std::runtime_error("Failed to open inputReceiver.obs");
     }
     if (!baseStationFile.is_open()) {
-        throw runtime_error("Failed to open inputBaseStation.obs");
+        throw std::runtime_error("Failed to open inputBaseStation.obs");
     }
     if (!processedFile.is_open()) {
-        throw runtime_error("Failed to open processed.pos");
+        throw std::runtime_error("Failed to open processed.pos");
     }
 
-    string reseiverLine;
-    string baseStationLine;
+    std::string receiverLine;
+    std::string baseStationLine;
 
     // Mocked base station true position
-    string baseStationTruePosition = "2025 01 19 13 31 37 0.03 0.11";
+    std::string_view baseStationTruePosition = "2025 01 19 13 31 37 0.03 0.11";
 
-    while (getline(receiverFile, reseiverLine)) {
+    while (getline(receiverFile, receiverLine)) {
         if (getline(baseStationFile, baseStationLine)) {
-            processedFile << processFileLine(reseiverLine, baseStationLine,
+            processedFile << processFileLine(receiverLine, baseStationLine,
                                              baseStationTruePosition)
                           << "\n";
         } else {
-            processedFile << reseiverLine << "\n";
+            processedFile << receiverLine << "\n";
         }
     }
-
-    receiverFile.close();
-    processedFile.close();
-
-    return 0;
 }
 
-int processUdpConnectionData() {
-    bool stillRunning;
-    string receivedMessage;
-    string correctionData = receiveSaposCorrectionData();
+void processUdpConnectionData() {
+    bool stillRunning = false;
+    std::string receivedMessage;
+    std::string_view correctionData = receiveSaposCorrectionData();
 
     do {
         try {
@@ -77,7 +72,7 @@ int processUdpConnectionData() {
 
             receivedMessage = std::string(data, length);
 
-            string message =
+            std::string message =
                 processMessageLine(receivedMessage, correctionData);
 
             std::cout << "PROCESSED LINE: " << message << std::endl;
@@ -91,17 +86,4 @@ int processUdpConnectionData() {
             stillRunning = false;
         }
     } while (stillRunning);
-
-    return 0;
-}
-
-int processData(int& dataSourceIndex) {
-    switch (dataSourceIndex) {
-        case 0:
-            return processFileData();
-        case 1:
-            return processUdpConnectionData();
-        default:
-            throw runtime_error("Wrong data source index!");
-    }
 }

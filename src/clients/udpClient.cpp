@@ -1,9 +1,10 @@
 #include <asio.hpp>
 #include <iostream>
+#include <string_view>
 
 using asio::ip::udp;
 
-void sendMessage(std::string& message) {
+void sendMessage(std::string_view message) {
     try {
         asio::io_context io_context;
 
