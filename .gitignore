@@ -37,3 +37,5 @@ main.dSYM
 temp
 external_libs
 .DS_Store
+Makefile
+test
