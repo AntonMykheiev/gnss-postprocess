@@ -44,11 +44,11 @@ void processFileData() {
 }
 
 void processUdpConnectionData() {
-    bool stillRunning = false;
+    bool stillRunning = true;
     std::string receivedMessage;
     std::string_view correctionData = receiveSaposCorrectionData();
 
-    do {
+    while (stillRunning) {
         try {
             asio::io_context io_context;
 
@@ -85,5 +85,5 @@ void processUdpConnectionData() {
 
             stillRunning = false;
         }
-    } while (stillRunning);
+    }
 }

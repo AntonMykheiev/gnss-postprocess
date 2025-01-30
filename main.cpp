@@ -2,16 +2,16 @@
 #include "dataProcessor.hpp"
 
 int main() {
-    int choise = 0;
+    int choice = 0;
 
     std::cout << "Choose an option:\n"
               << "1. File post-processing\n"
               << "2. UDP message processing\n"
               << "3. Exit programm.\n";
 
-    std::cin >> choise;
+    std::cin >> choice;
 
-    switch (choise) {
+    switch (choice) {
         case 1:
             processFileData();
 

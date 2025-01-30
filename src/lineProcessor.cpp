@@ -9,11 +9,11 @@ std::string_view getLineTimestamp(std::string_view line) {
 }
 
 double getXCoordinate(std::string_view line) {
-    return std::stod(std::string(line.substr(20, 4)));
+    return std::strtod(line.substr(20, 4).data(), 0);
 }
 
 double getYCoordinate(std::string_view line) {
-    return std::stod(std::string(line.substr(25, 4)));
+    return std::strtod(line.substr(25, 4).data(), 0);
 }
 
 double calculateCorrectionValue(double &baseStationCoordinate,
@@ -27,8 +27,8 @@ double calculatePreciseCoordinate(double &receiverCoordinate,
 }
 }  // namespace
 
-std::string processFileLine(std::string &receiverLine,
-                            std::string &baseStationLine,
+std::string processFileLine(std::string_view receiverLine,
+                            std::string_view baseStationLine,
                             std::string_view baseStationTruePosition) {
     std::stringstream processedLine;
 
@@ -57,7 +57,7 @@ std::string processFileLine(std::string &receiverLine,
     return processedLine.str();
 }
 
-std::string processMessageLine(std::string &messageLine,
+std::string processMessageLine(std::string_view messageLine,
                                std::string_view correctionData) {
     std::stringstream processedLine;
 
