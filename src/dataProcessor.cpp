@@ -50,25 +50,25 @@ void processUdpConnectionData() {
 
     while (stillRunning) {
         try {
-            asio::io_context io_context;
+            asio::io_context ioContext;
 
-            udp::socket socket(io_context, udp::v4());
+            udp::socket socket(ioContext, udp::v4());
             socket.bind(udp::endpoint(udp::v4(), 12345));
 
             std::cout << "Waiting for a message..." << std::endl;
 
             char data[1024];
 
-            udp::endpoint sender_endpoint;
+            udp::endpoint senderEndpoint;
 
             size_t length =
-                socket.receive_from(asio::buffer(data), sender_endpoint);
+                socket.receive_from(asio::buffer(data), senderEndpoint);
 
             std::cout << "Received message: " << std::string(data, length)
                       << std::endl;
             std::cout << "Sender address: "
-                      << sender_endpoint.address().to_string() << std::endl;
-            std::cout << "Sender port: " << sender_endpoint.port() << std::endl;
+                      << senderEndpoint.address().to_string() << std::endl;
+            std::cout << "Sender port: " << senderEndpoint.port() << std::endl;
 
             receivedMessage = std::string(data, length);
 
