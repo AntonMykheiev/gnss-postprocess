@@ -1,35 +1,35 @@
+#include "lineProcessor.hpp"
+
 #include <fstream>
 #include <sstream>
 #include <string>
 #include <string_view>
 
-namespace {  // anonymous namespace
-std::string_view getLineTimestamp(std::string_view line) {
+std::string_view LineProcessor::getLineTimestamp(std::string_view line) {
     return line.substr(0, 19);
 }
 
-double getXCoordinate(std::string_view line) {
+double LineProcessor::getXCoordinate(std::string_view line) {
     return std::strtod(line.substr(20, 4).data(), 0);
 }
 
-double getYCoordinate(std::string_view line) {
+double LineProcessor::getYCoordinate(std::string_view line) {
     return std::strtod(line.substr(25, 4).data(), 0);
 }
 
-double calculateCorrectionValue(double &baseStationCoordinate,
-                                double &baseStationTrueCoordinate) {
+double LineProcessor::calculateCorrectionValue(
+    double &baseStationCoordinate, double &baseStationTrueCoordinate) {
     return baseStationTrueCoordinate - baseStationCoordinate;
 }
 
-double calculatePreciseCoordinate(double &receiverCoordinate,
-                                  double &correctionCoordinate) {
+double LineProcessor::calculatePreciseCoordinate(double &receiverCoordinate,
+                                                 double &correctionCoordinate) {
     return receiverCoordinate + correctionCoordinate;
 }
-}  // namespace
 
-std::string processFileLine(std::string_view receiverLine,
-                            std::string_view baseStationLine,
-                            std::string_view baseStationTruePosition) {
+std::string LineProcessor::processFileLine(
+    std::string_view receiverLine, std::string_view baseStationLine,
+    std::string_view baseStationTruePosition) {
     std::stringstream processedLine;
 
     std::string_view receiverLineTimestamp = getLineTimestamp(receiverLine);
@@ -57,8 +57,8 @@ std::string processFileLine(std::string_view receiverLine,
     return processedLine.str();
 }
 
-std::string processMessageLine(std::string_view messageLine,
-                               std::string_view correctionData) {
+std::string LineProcessor::processMessageLine(std::string_view messageLine,
+                                              std::string_view correctionData) {
     std::stringstream processedLine;
 
     std::string_view receiverLineTimestamp = getLineTimestamp(messageLine);

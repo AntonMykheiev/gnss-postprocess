@@ -1,41 +1,54 @@
+#include "dataProcessor.hpp"
+
 #include <asio.hpp>
 #include <fstream>
 #include <iostream>
+#include <memory>
 #include <sstream>
 #include <string>
 #include <string_view>
 
 #include "lineProcessor.hpp"
-#include "saposClient.hpp"
-#include "udpClient.hpp"
 
 using asio::ip::udp;
 
-void processFileData() {
-    std::ifstream receiverFile("./input/inputReceiver.obs");
-    std::ifstream baseStationFile("./input/inputBaseStation.obs");
-    std::ofstream processedFile("./result/processed.pos");
-
+DataProcessor::DataProcessor(std::shared_ptr<LineProcessor> lineProcessor,
+                             const std::string_view receiverPath,
+                             const std::string_view baseStationPath,
+                             const std::string_view processedPath)
+    : lineProcessor(std::move(lineProcessor)),
+      receiverFile(receiverPath),
+      baseStationFile(baseStationPath),
+      processedFile(processedPath) {
     if (!receiverFile.is_open()) {
-        throw std::runtime_error("Failed to open inputReceiver.obs");
+        throw std::runtime_error("Failed to open receiver file");
     }
+
     if (!baseStationFile.is_open()) {
-        throw std::runtime_error("Failed to open inputBaseStation.obs");
+        throw std::runtime_error("Failed to open base station file");
     }
+
     if (!processedFile.is_open()) {
-        throw std::runtime_error("Failed to open processed.pos");
+        throw std::runtime_error("Failed to open processed file");
     }
+}
 
-    std::string receiverLine;
-    std::string baseStationLine;
+DataProcessor::DataProcessor(std::shared_ptr<LineProcessor> lineProcessor,
+                             std::shared_ptr<SaposClient> saposClient,
+                             std::shared_ptr<UdpClient> udpClient)
+    : lineProcessor(std::move(lineProcessor)),
+      saposClient(std::move(saposClient)),
+      udpClient(std::move(udpClient)) {}
 
+void DataProcessor::processFileData() {
     // Mocked base station true position
     std::string_view baseStationTruePosition = "2025 01 19 13 31 37 0.03 0.11";
 
     while (getline(receiverFile, receiverLine)) {
         if (getline(baseStationFile, baseStationLine)) {
-            processedFile << processFileLine(receiverLine, baseStationLine,
-                                             baseStationTruePosition)
+            processedFile << lineProcessor->processFileLine(
+                                 receiverLine, baseStationLine,
+                                 baseStationTruePosition)
                           << "\n";
         } else {
             processedFile << receiverLine << "\n";
@@ -43,10 +56,10 @@ void processFileData() {
     }
 }
 
-void processUdpConnectionData() {
+void DataProcessor::processUdpConnectionData() {
     bool stillRunning = true;
     std::string receivedMessage;
-    std::string_view correctionData = receiveSaposCorrectionData();
+    std::string_view correctionData = saposClient->receiveSaposCorrectionData();
 
     while (stillRunning) {
         try {
@@ -72,12 +85,12 @@ void processUdpConnectionData() {
 
             receivedMessage = std::string(data, length);
 
-            std::string message =
-                processMessageLine(receivedMessage, correctionData);
+            std::string message = lineProcessor->processMessageLine(
+                receivedMessage, correctionData);
 
             std::cout << "PROCESSED LINE: " << message << std::endl;
 
-            sendMessage(message);
+            udpClient->sendMessage(message);
 
             stillRunning = true;
         } catch (const std::exception& e) {

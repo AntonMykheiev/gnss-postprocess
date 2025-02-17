@@ -1,7 +1,7 @@
-#ifndef UDP_C
-#define UDP_C
+#include <string_view>
 
-// Call this function for sending a message with processed navigation data.
-void sendMessage(std::string_view message);
-
-#endif
+#pragma once
+class UdpClient {
+   public:
+    void sendMessage(std::string_view message);
+};
