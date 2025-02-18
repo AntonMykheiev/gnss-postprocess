@@ -1,3 +1,6 @@
+#ifndef DATA_PROCESSOR_HPP
+#define DATA_PROCESSOR_HPP
+
 #include <fstream>
 #include <memory>
 #include <sstream>
@@ -33,3 +36,5 @@ class DataProcessor {
     void processFileData();
     void processUdpConnectionData();
 };
+
+#endif

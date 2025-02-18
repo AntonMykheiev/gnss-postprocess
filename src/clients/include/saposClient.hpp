@@ -1,7 +1,8 @@
+#ifndef SAPOS_CLIENT_HPP
+#define SAPOS_CLIENT_HPP
+
 #include <string>
 #include <string_view>
-
-#pragma once
 
 class SaposClient {
    private:
@@ -10,3 +11,5 @@ class SaposClient {
    public:
     std::string_view receiveSaposCorrectionData();
 };
+
+#endif

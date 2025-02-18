@@ -42,12 +42,20 @@ DataProcessor::DataProcessor(std::shared_ptr<LineProcessor> lineProcessor,
 
 void DataProcessor::processFileData() {
     // Mocked base station true position
-    std::string_view baseStationTruePosition = "2025 01 19 13 31 37 0.03 0.11";
+    std::string baseStationTruePositionLine = "2025 01 19 13 31 37 0.03 0.11";
+
+    std::shared_ptr<Position> receiverPosition;
+    std::shared_ptr<Position> baseStationPosition;
+    std::shared_ptr<Position> baseStationTruePosition =
+        std::make_shared<Position>(baseStationTruePositionLine);
 
     while (getline(receiverFile, receiverLine)) {
         if (getline(baseStationFile, baseStationLine)) {
-            processedFile << lineProcessor->processFileLine(
-                                 receiverLine, baseStationLine,
+            receiverPosition = std::make_shared<Position>(receiverLine);
+            baseStationPosition = std::make_shared<Position>(baseStationLine);
+
+            processedFile << lineProcessor->processPrecisePosition(
+                                 receiverPosition, baseStationPosition,
                                  baseStationTruePosition)
                           << "\n";
         } else {
@@ -58,8 +66,9 @@ void DataProcessor::processFileData() {
 
 void DataProcessor::processUdpConnectionData() {
     bool stillRunning = true;
-    std::string receivedMessage;
-    std::string_view correctionData = saposClient->receiveSaposCorrectionData();
+    std::shared_ptr<Position> receiverPosition;
+    std::shared_ptr<Position> absoluteBaseStationPosition =
+        std::make_shared<Position>(saposClient->receiveSaposCorrectionData());
 
     while (stillRunning) {
         try {
@@ -83,10 +92,11 @@ void DataProcessor::processUdpConnectionData() {
                       << senderEndpoint.address().to_string() << std::endl;
             std::cout << "Sender port: " << senderEndpoint.port() << std::endl;
 
-            receivedMessage = std::string(data, length);
+            receiverPosition =
+                std::make_shared<Position>(std::string(data, length));
 
-            std::string message = lineProcessor->processMessageLine(
-                receivedMessage, correctionData);
+            std::string message = lineProcessor->processPrecisePosition(
+                receiverPosition, absoluteBaseStationPosition);
 
             std::cout << "PROCESSED LINE: " << message << std::endl;
 

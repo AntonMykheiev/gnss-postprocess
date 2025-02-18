@@ -1,22 +1,30 @@
+#ifndef LINE_PROCESSOR_HPP
+#define LINE_PROCESSOR_HPP
+
+#include <memory>
 #include <string>
 #include <string_view>
-#pragma once
 
+#include "position.hpp"
 class LineProcessor {
    private:
-    std::string_view getLineTimestamp(std::string_view line);
-    double getXCoordinate(std::string_view line);
-    double getYCoordinate(std::string_view line);
-    double calculateCorrectionValue(double &baseStationCoordinate,
-                                    double &baseStationTrueCoordinate);
-    double calculatePreciseCoordinate(double &receiverCoordinate,
-                                      double &correctionCoordinate);
+    void calculatePreciseBaseStationCoordinates(
+        std::shared_ptr<Position> &baseStationPosition,
+        std::shared_ptr<Position> &baseStationTruePosition);
+    void calculatePreciseReceiverCoordinates(
+        std::shared_ptr<Position> &receiverPosition,
+        std::shared_ptr<Position> &baseStationPosition);
 
    public:
     explicit LineProcessor() = default;
-    std::string processFileLine(std::string_view receiverLine,
-                                std::string_view baseStationLine,
-                                std::string_view baseStationTruePosition);
-    std::string processMessageLine(std::string_view messageLine,
-                                   std::string_view correctionData);
+    std::string processPrecisePosition(
+        std::shared_ptr<Position> &receiverPosition,
+        std::shared_ptr<Position> &baseStationPosition,
+        std::shared_ptr<Position> &baseStationTruePosition);
+
+    std::string processPrecisePosition(
+        std::shared_ptr<Position> &receiverPosition,
+        std::shared_ptr<Position> &absoluteBaseStationPosition);
 };
+
+#endif
