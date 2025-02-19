@@ -1,13 +1,30 @@
-#ifndef LINE_P
-#define LINE_P
+#ifndef LINE_PROCESSOR_HPP
+#define LINE_PROCESSOR_HPP
 
-// This function processing a line with navi data from a pre-uploaded file
-std::string processFileLine(std::string_view receiverLine,
-                            std::string_view baseStationLine,
-                            std::string_view baseStationTruePosition);
+#include <memory>
+#include <string>
+#include <string_view>
 
-// This function processing a line with navi data from a UDP message
-std::string processMessageLine(std::string_view messageLine,
-                               std::string_view correctionData);
+#include "position.hpp"
+class LineProcessor {
+   private:
+    void calculatePreciseBaseStationCoordinates(
+        std::shared_ptr<Position> &baseStationPosition,
+        std::shared_ptr<Position> &baseStationTruePosition);
+    void calculatePreciseReceiverCoordinates(
+        std::shared_ptr<Position> &receiverPosition,
+        std::shared_ptr<Position> &baseStationPosition);
+
+   public:
+    explicit LineProcessor() = default;
+    std::string processPrecisePosition(
+        std::shared_ptr<Position> &receiverPosition,
+        std::shared_ptr<Position> &baseStationPosition,
+        std::shared_ptr<Position> &baseStationTruePosition);
+
+    std::string processPrecisePosition(
+        std::shared_ptr<Position> &receiverPosition,
+        std::shared_ptr<Position> &absoluteBaseStationPosition);
+};
 
 #endif

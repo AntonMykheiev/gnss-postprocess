@@ -1,79 +1,58 @@
+#include "lineProcessor.hpp"
+
 #include <fstream>
 #include <sstream>
 #include <string>
 #include <string_view>
 
-namespace {  // anonymous namespace
-std::string_view getLineTimestamp(std::string_view line) {
-    return line.substr(0, 19);
+#include "position.hpp"
+
+void LineProcessor::calculatePreciseBaseStationCoordinates(
+    std::shared_ptr<Position> &baseStationPosition,
+    std::shared_ptr<Position> &baseStationTruePosition) {
+    baseStationPosition->setX(baseStationTruePosition->getX() -
+                              baseStationPosition->getX());
+    baseStationPosition->setY(baseStationTruePosition->getY() -
+                              baseStationPosition->getY());
 }
 
-double getXCoordinate(std::string_view line) {
-    return std::strtod(line.substr(20, 4).data(), 0);
+void LineProcessor::calculatePreciseReceiverCoordinates(
+    std::shared_ptr<Position> &receiverPosition,
+    std::shared_ptr<Position> &baseStationPosition) {
+    receiverPosition->setX(receiverPosition->getX() +
+                           baseStationPosition->getX());
+    receiverPosition->setY(receiverPosition->getY() +
+                           baseStationPosition->getY());
 }
 
-double getYCoordinate(std::string_view line) {
-    return std::strtod(line.substr(25, 4).data(), 0);
-}
-
-double calculateCorrectionValue(double &baseStationCoordinate,
-                                double &baseStationTrueCoordinate) {
-    return baseStationTrueCoordinate - baseStationCoordinate;
-}
-
-double calculatePreciseCoordinate(double &receiverCoordinate,
-                                  double &correctionCoordinate) {
-    return receiverCoordinate + correctionCoordinate;
-}
-}  // namespace
-
-std::string processFileLine(std::string_view receiverLine,
-                            std::string_view baseStationLine,
-                            std::string_view baseStationTruePosition) {
+std::string LineProcessor::processPrecisePosition(
+    std::shared_ptr<Position> &receiverPosition,
+    std::shared_ptr<Position> &baseStationPosition,
+    std::shared_ptr<Position> &baseStationTruePosition) {
     std::stringstream processedLine;
 
-    std::string_view receiverLineTimestamp = getLineTimestamp(receiverLine);
+    calculatePreciseBaseStationCoordinates(baseStationPosition,
+                                           baseStationTruePosition);
+    calculatePreciseReceiverCoordinates(receiverPosition, baseStationPosition);
 
-    double receiverX = getXCoordinate(receiverLine);
-    double receiverY = getYCoordinate(receiverLine);
-
-    double baseStationX = getXCoordinate(baseStationLine);
-    double baseStationY = getYCoordinate(baseStationLine);
-
-    double baseStationTrueX = getXCoordinate(baseStationTruePosition);
-    double baseStationTrueY = getYCoordinate(baseStationTruePosition);
-
-    double correctionX =
-        calculateCorrectionValue(baseStationX, baseStationTrueX);
-    double correctionY =
-        calculateCorrectionValue(baseStationY, baseStationTrueY);
-
-    double preciseX = calculatePreciseCoordinate(receiverX, correctionX);
-    double preciseY = calculatePreciseCoordinate(receiverY, correctionY);
-
-    processedLine << receiverLineTimestamp << ' ' << std::fixed
-                  << std::setprecision(2) << preciseX << ' ' << preciseY;
+    processedLine << receiverPosition->getTimestamp() << ' ' << std::fixed
+                  << std::setprecision(2) << receiverPosition->getX() << ' '
+                  << receiverPosition->getY();
 
     return processedLine.str();
 }
 
-std::string processMessageLine(std::string_view messageLine,
-                               std::string_view correctionData) {
+std::string LineProcessor::processPrecisePosition(
+    std::shared_ptr<Position> &receiverPosition,
+    std::shared_ptr<Position> &absoluteBaseStationPosition) {
     std::stringstream processedLine;
 
-    std::string_view receiverLineTimestamp = getLineTimestamp(messageLine);
+    calculatePreciseReceiverCoordinates(receiverPosition,
+                                        absoluteBaseStationPosition);
 
-    double messageX = getXCoordinate(messageLine);
-    double messageY = getYCoordinate(messageLine);
-
-    double correctionX = getXCoordinate(correctionData);
-    double correctionY = getYCoordinate(correctionData);
-
-    double preciseX = calculatePreciseCoordinate(messageX, correctionX);
-    double preciseY = calculatePreciseCoordinate(messageY, correctionY);
-
-    processedLine << receiverLineTimestamp << ' ' << std::fixed
-                  << std::setprecision(2) << preciseX << ' ' << preciseY;
+    processedLine << receiverPosition->getTimestamp() << ' ' << std::fixed
+                  << std::setprecision(2) << receiverPosition->getX() << ' '
+                  << receiverPosition->getY();
 
     return processedLine.str();
 }

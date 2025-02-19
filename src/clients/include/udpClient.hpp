@@ -1,7 +1,11 @@
-#ifndef UDP_C
-#define UDP_C
+#ifndef UDP_CLIENT_HPP
+#define UDP_CLIENT_HPP
 
-// Call this function for sending a message with processed navigation data.
-void sendMessage(std::string_view message);
+#include <string_view>
+
+class UdpClient {
+   public:
+    void sendMessage(std::string_view message);
+};
 
 #endif
